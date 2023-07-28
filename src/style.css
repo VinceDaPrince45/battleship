@@ -17,3 +17,7 @@ body {
     align-items: center;
     width:auto;
 }
+
+div.chosen {
+    background-color: green;
+}
