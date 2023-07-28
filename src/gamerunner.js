@@ -2,6 +2,8 @@ import Player from "./player";
 
 const body = document.querySelector('body');
 
+let orientation = 'row';
+
 export function startGame() {
     const playerOne = new Player('Player One');
     const playerTwo = new Player('Player Two');
@@ -13,51 +15,10 @@ export function startGame() {
     // place ships in order
     const ships = [{name:'carrier',length:5},{name:'battleship',length:4},{name:'destroyer',length:3}, {name:'sumbarine',length:3}, {name:'patrol boat',length:2}]
 
-    let orientation = 'row';
-    changeShips(orientation);
+    changeShips();
 
     // go to next ship when pressed
-    let idx = 0;
-    let shipName = ships[idx].name;
-    document.querySelector('.shipname').textContent = `Place ${shipName}`;
-    document.querySelector('.grid').addEventListener('click', (e) => {
-        // add conditional to see if placement is valid
-            shipName = ships[++idx].name;
-            document.querySelector('.shipname').textContent = `Place ${shipName}`
-    })
-
-    const cells = document.querySelectorAll('.cell')
-    document.querySelector('.grid').addEventListener('mouseover', (e) => {
-        if (e.target.classList.contains('cell')) {
-            // change all cells to white
-            for (const cell of cells) {
-                cell.style.backgroundColor = 'white'
-            }
-            // look at length of ship
-            let lengthShip = ships[idx].length;
-            let location = +e.target.getAttribute('id');
-            // look at orientation
-            if (orientation == 'row') {
-                let locationArray = [];
-                for (let i = location; i < location+lengthShip; i++) {
-                    locationArray.push(i);
-                }
-                if (locationArray.every((number) => number >= 0 && number <= 99)) {
-                    // highlight row around it green
-                    for (const number of locationArray) {
-                        document.getElementById(`${number.toString()}`).style.backgroundColor = 'grey';
-                    }
-                } else {
-                    // highlight red
-                    e.target.style.backgroundColor = 'red';
-                }
-            } else if (orientation == 'column') {
-
-            }
-            // add that to row/column depending on orientation
-                // row will be default
-        }
-    })
+    placeShips(ships,playerOne);
 
     // check if ship placement is valid with functions
     // when ready press start
@@ -90,7 +51,7 @@ function makeStartGrid() {
     body.appendChild(grid);
 }
 
-function changeShips(variable) {
+function changeShips() {
     const name = document.createElement('div');
     name.classList.add('shipname');
     name.style.cssText = 'text-align:center';
@@ -103,19 +64,19 @@ function changeShips(variable) {
 
     // change orientation
     changeOrientation.addEventListener('click', () => {
-        if (variable == 'row') {
-            variable = 'column';
-        } else if (variable == 'column') variable = 'row';
+        if (orientation == 'row') {
+            orientation = 'column';
+        } else if (orientation == 'column') orientation = 'row';
     })
 }
 
-function placeShips(array) {
+function placeShips(array,player) {
     let idx = 0;
-    let shipName = ships[idx].name;
+    let shipName = array[idx].name;
     document.querySelector('.shipname').textContent = `Place ${shipName}`;
     document.querySelector('.grid').addEventListener('click', (e) => {
         // add conditional to see if placement is valid
-            shipName = ships[++idx].name;
+            shipName = array[++idx].name;
             document.querySelector('.shipname').textContent = `Place ${shipName}`
     })
 
@@ -127,15 +88,27 @@ function placeShips(array) {
                 cell.style.backgroundColor = 'white'
             }
             // look at length of ship
-            let lengthShip = ships[idx].length;
+            let lengthShip = array[idx].length;
             let location = +e.target.getAttribute('id');
             // look at orientation
+            let locationArray = [];
             if (orientation == 'row') {
-                let locationArray = [];
                 for (let i = location; i < location+lengthShip; i++) {
                     locationArray.push(i);
                 }
-                if (locationArray.every((number) => number >= 0 && number <= 99)) {
+                if (player.gameboard.checkCollision(locationArray)) {
+                    for (const number of locationArray) {
+                        document.getElementById(`${number.toString()}`).style.backgroundColor = 'grey';
+                    }
+                } else {
+                    e.target.style.backgroundColor = 'red';
+                }
+            } else if (orientation == 'column') {
+                for (let i = 0;i<lengthShip;i++) {
+                    locationArray.push(location);
+                    location += 10;
+                }
+                if (player.gameboard.checkCollision(locationArray)) {
                     // highlight row around it green
                     for (const number of locationArray) {
                         document.getElementById(`${number.toString()}`).style.backgroundColor = 'grey';
@@ -144,12 +117,14 @@ function placeShips(array) {
                     // highlight red
                     e.target.style.backgroundColor = 'red';
                 }
-            } else if (orientation == 'column') {
-
             }
             // add that to row/column depending on orientation
                 // row will be default
         }
     })
 
+}
+
+export function computerBoard() {
+    
 }
