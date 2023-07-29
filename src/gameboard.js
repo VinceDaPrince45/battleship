@@ -15,18 +15,11 @@ class Gameboard {
     }
 
     placeShips(ship) {
-        // call class new Ships and if its player, allow them to choose location of five ships and if its robot, allow them to randomly choose spot
         ship.position.every((cell) => this.board[cell].hasShip = ship.name);
-        // will have to have restrictions on where ships are placed based on current board and cannot be placed outside boundary
     }
 
     receiveAttack(position) {
-        // takes in parameter position and compares it to board
         this.board[position].isShot = true;
-            // if position is empty on this.board, place a marker on this.board location to show that you cant place there anymore
-            // if position == boat position, register a hit to corresponding boats
-                // if boats has enough hits, display that boat has been destroyed
-            // else display that cannot be placed here
     }
 
     checkShot(position) {

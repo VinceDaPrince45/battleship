@@ -7,10 +7,10 @@ class Player {
         this.gameboard = new Gameboard();
     }
 
-    fireShot(location,gameboard) {
-        if (gameboard.board[location].isShot == false) {
-            gameboard.receiveAttack(location);
-        }
+    receiveShot(location) {
+        if (this.gameboard.board[location].isShot == false) {
+            return true;
+        } else return false;
     }
 }
 

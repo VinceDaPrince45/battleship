@@ -11,25 +11,10 @@ const ships = [{name:'carrier',length:5},{name:'battleship',length:4},{name:'des
 export function startGame() {
     const playerOne = new Player('Player One');
     const playerTwo = new Player('Player Two');
-    // starting screen
-    // one grid shows up 
-   
+    body.classList.add('start');
     makeStartGrid();
-
-    // place ships in order
-
     changeShips();
-
-    // go to next ship when pressed
     placeShips(playerOne,playerTwo);
-
-    // check if ship placement is valid with functions
-    // when ready press start
-
-    // pressing start deletes all previous dom and creates two grids side by side
-        // grid highlights when hovering over enemy board
-        // when pressin on cell of opponent grid
-            // check if shot is valid on enemy board and receieve the shot
 }
 
 function makeStartGrid() {
@@ -149,8 +134,6 @@ function placeShips(playerOne,playerTwo) {
 
 export function computerBoard(player) {
     idx = 0;
-    // choose random spot on board and add to index
-    // determine if fits on player two board
     for (const item of ships) {
         // find position
         let positionArray = [];
@@ -187,14 +170,107 @@ export function computerBoard(player) {
         player.ships.push(ship);
         player.gameboard.placeShips(ship);
     }
-    console.log(player.ships)
 }
 
 function runGame(playerOne,playerTwo) {
+    body.classList.remove('start')
     clearBody();
     computerBoard(playerTwo);
+    createTwoGrids();
+    displayOwnShips(playerOne);
+
+    document.querySelector('.secondgrid').addEventListener('click', (e) => {
+        attack(e,playerOne,playerTwo);
+    })
 }
 
 function clearBody() {
-    body.textContent = '';
+    body.removeChild(document.querySelector('.grid'));
+    body.removeChild(document.querySelector('.shipname'));
+    body.removeChild(document.querySelector('button'));
 }
+
+function createTwoGrids() {
+    const gridContainer = document.createElement('div');
+
+    const firstGrid = document.createElement('div');
+    firstGrid.classList.add('owngrid');
+    for (let i = 9; i >= 0; i--) {
+        // make rows
+        const row = document.createElement('div');
+        for (let j = 0; j < 10; j++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.classList.add('own');
+            if (i == 0) {
+                cell.setAttribute('id',j.toString());
+            } else cell.setAttribute('id',i.toString() + j.toString());
+            cell.style.cssText = 'height: 2.5em; width: 2.5em; border: 1px solid black';
+            row.appendChild(cell);
+        }
+        row.style.cssText = 'display:flex;flex-direction:row';
+        firstGrid.appendChild(row);
+    }
+    gridContainer.appendChild(firstGrid);
+
+    const secondGrid = document.createElement('div');
+    secondGrid.classList.add('secondgrid');
+    for (let i = 9; i >= 0; i--) {
+        // make rows
+        const row = document.createElement('div');
+        for (let j = 0; j < 10; j++) {
+            const cell = document.createElement('div');
+            cell.classList.add('cell');
+            cell.classList.add('opponent');
+            if (i == 0) {
+                cell.setAttribute('id',j.toString());
+            } else cell.setAttribute('id',i.toString() + j.toString());
+            cell.style.cssText = 'height: 2.5em; width: 2.5em; border: 1px solid black';
+            row.appendChild(cell);
+        }
+        row.style.cssText = 'display:flex;flex-direction:row';
+        secondGrid.appendChild(row);
+    }
+    gridContainer.appendChild(secondGrid);
+
+    gridContainer.classList.add('middle');
+    
+    const status = document.createElement('div');
+    status.classList.add('status');
+    status.style.textAlign = 'center'
+
+    body.classList.add('ongoing');
+    body.append(gridContainer,status);
+
+}
+
+function displayOwnShips(player) {
+    let playerBoard = player.gameboard.board;
+    for (const position of playerBoard) {
+        let index = playerBoard.indexOf(position);
+        if (position.hasShip !== false) {
+            document.getElementById(index.toString()).style.backgroundColor = 'green';
+        }
+    }
+}
+
+function attack(e,firstPlayer,secondPlayer) {
+    let position = e.target.getAttribute('id');
+    if (secondPlayer.receiveShot(position)) {
+        secondPlayer.gameboard.receiveAttack(position);
+        if (secondPlayer.gameboard.checkShot(position)) {
+            e.target.style.backgroundColor = 'green';
+            document.querySelector('.status').textContent = 'hit a ship';
+        } else {
+            e.target.style.backgroundColor = 'red';
+            document.querySelector('.status').textContent = 'hit nothing';
+        }
+    } else {
+        document.querySelector('.status').textContent = 'already hit'
+    }
+}
+
+function checkWinner() {
+
+}
+
