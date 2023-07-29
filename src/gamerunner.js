@@ -21,7 +21,7 @@ export function startGame() {
     changeShips();
 
     // go to next ship when pressed
-    placeShips(playerOne);
+    placeShips(playerOne,playerTwo);
 
     // check if ship placement is valid with functions
     // when ready press start
@@ -147,20 +147,52 @@ function placeShips(playerOne,playerTwo) {
 
 }
 
-export function computerBoard() {
+export function computerBoard(player) {
     idx = 0;
     // choose random spot on board and add to index
     // determine if fits on player two board
     for (const item of ships) {
         // find position
-        
-        // let ship = new Ship(item.name,position)
+        let positionArray = [];
+        let initialPosition = Math.floor(Math.random() * (99 - 0 + 1) + 0);
+        // choose random orientation
+        let randomBool = Math. random() > 0.5; 
+        // if true, row / if false, column
+        if (randomBool) {
+            for (let i = initialPosition;i<initialPosition + item.length;i++) {
+                positionArray.push(i);
+            }
+        } else {
+            for (let i = 0;i<item.length;i++) {
+                positionArray.push(initialPosition);
+                initialPosition += 10;
+            }
+        }
+        while (!player.gameboard.checkCollision(positionArray)) {
+            positionArray = [];
+            initialPosition = Math.floor(Math.random() * (99 - 0 + 1) + 0);
+            randomBool = Math. random() > 0.5; 
+            if (randomBool) {
+                for (let i = initialPosition;i<initialPosition + item.length;i++) {
+                    positionArray.push(i);
+                }
+            } else {
+                for (let i = 0;i<item.length;i++) {
+                    positionArray.push(initialPosition);
+                    initialPosition += 10;
+                }
+            }
+        }
+        let ship = new Ship(item.name,positionArray);
+        player.ships.push(ship);
+        player.gameboard.placeShips(ship);
     }
+    console.log(player.ships)
 }
 
 function runGame(playerOne,playerTwo) {
     clearBody();
-    computerBoard();
+    computerBoard(playerTwo);
 }
 
 function clearBody() {
