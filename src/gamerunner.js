@@ -3,9 +3,10 @@ import Gameboard from './gameboard';
 import Ship from './ship';
 
 const body = document.querySelector('body');
-
 let orientation = 'row';
 let locationArray;
+let idx = 0;
+const ships = [{name:'carrier',length:5},{name:'battleship',length:4},{name:'destroyer',length:3}, {name:'sumbarine',length:3}, {name:'patrol boat',length:2}]
 
 export function startGame() {
     const playerOne = new Player('Player One');
@@ -16,12 +17,11 @@ export function startGame() {
     makeStartGrid();
 
     // place ships in order
-    const ships = [{name:'carrier',length:5},{name:'battleship',length:4},{name:'destroyer',length:3}, {name:'sumbarine',length:3}, {name:'patrol boat',length:2}]
 
     changeShips();
 
     // go to next ship when pressed
-    placeShips(ships,playerOne);
+    placeShips(playerOne);
 
     // check if ship placement is valid with functions
     // when ready press start
@@ -73,21 +73,26 @@ function changeShips() {
     })
 }
 
-function placeShips(array,player) {
-    let idx = 0;
-    let shipName = array[idx].name;
+function placeShips(playerOne,playerTwo) {
+    let shipName = ships[idx].name;
     document.querySelector('.shipname').textContent = `Place ${shipName}`;
     document.querySelector('.grid').addEventListener('click', (e) => {
-        if (player.gameboard.checkCollision(locationArray)) {
+        if (playerOne.gameboard.checkCollision(locationArray)) {
             // initialize ship and add to player container
             for (const number of locationArray) {
                 document.getElementById(`${number.toString()}`).style.backgroundColor = 'green';
             }
             let ship = new Ship(shipName,locationArray.map((cell) => +cell));
-            player.ships.push(ship);
-            player.gameboard.placeShips(ship);
-            shipName = array[++idx].name;
-            document.querySelector('.shipname').textContent = `Place ${shipName}`;
+            playerOne.ships.push(ship);
+            playerOne.gameboard.placeShips(ship);
+            if (idx + 1 == ships.length) {
+                // run code to play actual game
+                // set up computer board
+                runGame(playerOne,playerTwo);
+            } else {
+                shipName = ships[++idx].name;
+                document.querySelector('.shipname').textContent = `Place ${shipName}`;
+            }
         }
     })
 
@@ -99,15 +104,15 @@ function placeShips(array,player) {
                 cell.style.backgroundColor = 'white'
             }
             // if there are ships in player gameboard, display chosen boat areas
-            if (player.ships.length !== 0) {
-                for (const singleShip of player.ships) {
+            if (playerOne.ships.length !== 0) {
+                for (const singleShip of playerOne.ships) {
                     singleShip.position.forEach((position) => {
                         document.getElementById(position.toString()).style.backgroundColor = 'green'
                     })
                 }
             }
             // look at length of ship
-            let lengthShip = array[idx].length;
+            let lengthShip = ships[idx].length;
             let location = +e.target.getAttribute('id');
             // look at orientation
             locationArray = [];
@@ -115,7 +120,7 @@ function placeShips(array,player) {
                 for (let i = location; i < location+lengthShip; i++) {
                     locationArray.push(i);
                 }
-                if (player.gameboard.checkCollision(locationArray)) {
+                if (playerOne.gameboard.checkCollision(locationArray)) {
                     for (const number of locationArray) {
                         document.getElementById(`${number.toString()}`).style.backgroundColor = 'grey';
                     }
@@ -127,7 +132,7 @@ function placeShips(array,player) {
                     locationArray.push(location);
                     location += 10;
                 }
-                if (player.gameboard.checkCollision(locationArray)) {
+                if (playerOne.gameboard.checkCollision(locationArray)) {
                     // highlight row around it green
                     for (const number of locationArray) {
                         document.getElementById(`${number.toString()}`).style.backgroundColor = 'grey';
@@ -143,5 +148,21 @@ function placeShips(array,player) {
 }
 
 export function computerBoard() {
-    
+    idx = 0;
+    // choose random spot on board and add to index
+    // determine if fits on player two board
+    for (const item of ships) {
+        // find position
+        
+        // let ship = new Ship(item.name,position)
+    }
+}
+
+function runGame(playerOne,playerTwo) {
+    clearBody();
+    computerBoard();
+}
+
+function clearBody() {
+    body.textContent = '';
 }
