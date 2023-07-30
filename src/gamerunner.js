@@ -178,7 +178,7 @@ function runGame(playerOne,playerTwo) {
     computerBoard(playerTwo);
     createTwoGrids();
     displayOwnShips(playerOne);
-
+    console.log(playerTwo.ships)
     document.querySelector('.secondgrid').addEventListener('click', (e) => {
         attack(e,playerOne,playerTwo);
     })
@@ -249,7 +249,7 @@ function displayOwnShips(player) {
     for (const position of playerBoard) {
         let index = playerBoard.indexOf(position);
         if (position.hasShip !== false) {
-            document.getElementById(index.toString()).style.backgroundColor = 'green';
+            document.getElementById(index.toString()).style.backgroundColor = 'grey';
         }
     }
 }
@@ -259,18 +259,59 @@ function attack(e,firstPlayer,secondPlayer) {
     if (secondPlayer.receiveShot(position)) {
         secondPlayer.gameboard.receiveAttack(position);
         if (secondPlayer.gameboard.checkShot(position)) {
-            e.target.style.backgroundColor = 'green';
-            document.querySelector('.status').textContent = 'hit a ship';
-        } else {
             e.target.style.backgroundColor = 'red';
-            document.querySelector('.status').textContent = 'hit nothing';
+            document.querySelector('.status').textContent = `${firstPlayer.name} hit a ship`;
+            addHit(position,secondPlayer);
+            checkWinner(firstPlayer,secondPlayer);
+        } else {
+            e.target.style.backgroundColor = 'green';
+            document.querySelector('.status').textContent = `${firstPlayer.name} hit nothing`;
         }
+        setTimeout(function() {
+            opponentTurn(firstPlayer,secondPlayer)
+        },400);
     } else {
         document.querySelector('.status').textContent = 'already hit'
     }
 }
 
-function checkWinner() {
+function addHit(position,player) {
+    // need to add a hit to ship and check whether or not ships sunk after
+    let shipName = player.gameboard.board[position].hasShip;
+    for (const ship of player.ships) {
+        if (shipName == ship.name) {
+            ship.hit(+position);
+            if (ship.sunk) {
+                document.querySelector('.status').textContent = 'destroyed a ship';
+            }
+        }
+    }
+}
 
+function opponentTurn(playerOne,playerTwo) {
+    let randomPosition = Math.floor(Math.random() * (99 - 0 + 1) + 0);
+    while (!playerOne.receiveShot(randomPosition)) {
+        randomPosition = Math.floor(Math.random() * (99 - 0 + 1) + 0);
+    }
+    if (playerOne.receiveShot(randomPosition)) {
+        playerOne.gameboard.receiveAttack(randomPosition);
+        if (playerOne.gameboard.checkShot(randomPosition)) {
+            document.getElementById(randomPosition.toString()).style.backgroundColor = 'red';
+            document.querySelector('.status').textContent = `${playerTwo.name} hit a ship`;
+            addHit(randomPosition,playerOne);
+            checkWinner(playerOne,playerTwo);
+        } else {
+            document.getElementById(randomPosition.toString()).style.backgroundColor = 'green';
+            document.querySelector('.status').textContent = `${playerTwo.name} hit nothing`;
+        }
+    }
+};
+
+function checkWinner(playerOne,playerTwo) {
+    if (playerOne.ships.every((ship) => ship.sunk == true)) {
+        document.querySelector('.status').textContent = `${playerOne.name} wins`;
+    } else if (playerTwo.ships.every((ship) => ship.sunk == true)) {
+        document.querySelector('.status').textContent = `${playerTwo.name} wins`;
+    }
 }
 

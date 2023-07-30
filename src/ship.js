@@ -15,7 +15,7 @@ class Ship {
 
   isSunk() {
     if (this.position.every((cell) => this.hits.includes(cell))) {
-        this.sunk = true;
+      this.sunk = true;
     }
   }
 
